@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <button id="id_getnow">get count now</button>
+    <button id="id_countup">countup</button>
+
+    <script>//このJSはボタンの下に書かないと上手く動作しない。
+        document.getElementById("id_getnow").addEventListener("click", ()=>{
+            const req = new XMLHttpRequest()
+            req.addEventListener("load",()=>{
+                console.log(req.responseText)
+                alert("getnow " + req.responseText)
+            })
+            req.open("GET","http://localhost:8080/getnow")
+            req.send()
+        })
+
+        document.getElementById("id_countup").addEventListener("click", ()=>{
+            const req = new XMLHttpRequest()
+            req.addEventListener("load",()=>{
+                console.log(req.responseText)
+                alert("countup! " + req.responseText)
+            })
+            req.open("GET","http://localhost:8080/countup")
+            req.send()
+        })
+    </script>
+
+</body>
+</html>
+
+
