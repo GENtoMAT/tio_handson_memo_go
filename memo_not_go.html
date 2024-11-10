@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>memo app not go</h1>
+    <h3>メモれ</h3>
+    <div>タイトル<input type="text" id="id-title" /></div>
+    <div>内容<textarea id="id-body"></textarea></div>
+    <button id="id-add-button">メモを登録</button>
+
+    <div>
+      <h3>メモの一覧</h3>
+      <button>メモを削除</button>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">-</th>
+            <th scope="col">タイトル</th>
+            <th scope="col">作成日</th>
+            <th scope="col">更新日</th>
+            <th scope="col">編集</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><input type="checkbox" /></th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+            <td><button>編集</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      let titleElement = document.getElementById("id-title");
+      let bodyElement = document.getElementById("id-body");
+      let addButton = document.getElementById("id-add-button");
+      addButton.addEventListener("click", (event) => {
+        let title = titleElement.value;
+        let body = bodyElement.value;
+        let createdAt = new Date().toISOString();
+        let updatedAt = "なし";
+        console.log(title + body + createdAt);
+      });
+    </script>
+  </body>
+</html>

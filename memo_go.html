@@ -6,11 +6,11 @@
     <button id="id_getnow">get count now</button>
     <button id="id_countup">countup</button>
 
-    <script>//このJSはボタンの下に書かないと上手く動作しない。
+    <script> //このJSはボタンの下に書かないと上手く動作しない。
         document.getElementById("id_getnow").addEventListener("click", ()=>{
             const req = new XMLHttpRequest()
-            req.addEventListener("load",()=>{
-                console.log(req.responseText)
+            req.addEventListener("load",()=>{ //sendした結果が返ってきたらこの関数が発火
+                console.log("console: getnow " + req.responseText) //http通信のresponse bodyをそのまま表示
                 alert("getnow " + req.responseText)
             })
             req.open("GET","http://localhost:8080/getnow")
@@ -20,12 +20,15 @@
         document.getElementById("id_countup").addEventListener("click", ()=>{
             const req = new XMLHttpRequest()
             req.addEventListener("load",()=>{
-                console.log(req.responseText)
+                console.log("console: countup! " + req.responseText)
                 alert("countup! " + req.responseText)
             })
             req.open("GET","http://localhost:8080/countup")
             req.send()
         })
+
+
+        
     </script>
 
 </body>
