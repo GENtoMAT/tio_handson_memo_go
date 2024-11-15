@@ -1,162 +1,162 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tio_memo</title>
-</head>
-<body>
+  </head>
+  <body>
     <h2>test memo app</h2>
-    <input type="text" id="id-input-memo">
+    <input type="text" id="id-input-memo" />
     <button id="id-add-memo">add memo</button>
     <button id="id-delete-memo">delete memo</button>
     <div id="id-content-memo"></div>
 
-    <p>商品の金額：<span class="class-price">1000</span>円</p><!-- 円をspanから出しておく。見た目的にもOKだし、後から数値計算しやすい。 -->
+    <p>商品の金額：<span class="class-price">1000</span>円</p>
+    <!-- 円をspanから出しておく。見た目的にもOKだし、後から数値計算しやすい。 -->
     <p>商品の金額：<span class="class-price">100</span>円</p>
     <p>商品の金額：<span class="class-price">10</span>円</p>
-    <input type="button" id="id-calc-price" value="計算"><br>
+    <input type="button" id="id-calc-price" value="計算" /><br />
     <p>合計：<span id="id-total-price"></span>円</p>
 
-
-
     <script>
-        addBtn = document.getElementById("id-add-memo")
-        addBtn.addEventListener("click",addMemo)
+      addBtn = document.getElementById("id-add-memo")
+      addBtn.addEventListener("click", addMemo)
 
-        dltBtn = document.getElementById("id-delete-memo")
-        dltBtn.addEventListener("click",deleteMemo)
+      dltBtn = document.getElementById("id-delete-memo")
+      dltBtn.addEventListener("click", deleteMemo)
 
-        memoList = document.getElementById("id-content-memo")
+      memoList = document.getElementById("id-content-memo")
 
-        a = 1000
-        if(a==100){
-            console.log("a is " + a)
-        } else {
-            console.log("a is not " + a)
+      a = 1000
+      if (a == 100) {
+        console.log("a is " + a)
+      } else {
+        console.log("a is not " + a)
+      }
+      console.log("owari")
+
+      array = [1, 2, 3, 4, 5]
+      for (let i = 0; i < array.length; i++) {
+        const element = array[i]
+        console.log(array[i])
+      }
+
+      function addMemo(event) {
+        inputText = document.getElementById("id-input-memo")
+        currentMemoList = memoList.innerHTML
+        //memo_list.innerText = "・" + input_text.value + "<br>"//innerTextで入れたらタグが発動しない
+        memoList.innerHTML = currentMemoList + "・" + inputText.value + "<br>" //innerHTMLで入れたらタグが発動する。ただ実際にはinnerHTMLの使用は非推奨
+      }
+
+      function deleteMemo(event) {
+        memoList.innerHTML = ""
+      }
+
+      btn = document.getElementById("id-calc-price")
+      // btn.addEventListener("click", calcTotalPrice)
+      // function calcTotalPrice(){
+      //     prices = document.getElementsByClassName("class-price")
+      //     totalPrice = 0
+      //     for (let index = 0; index < prices.length; index++) {
+      //         totalPrice = totalPrice + Number(prices[index].innerText) //数値にキャストはNumber()
+      //     }
+      //     pTotal = document.getElementById("id-total-price")
+      //     pTotal.innerText = totalPrice
+      // }
+      btn.addEventListener("click", function () {
+        //無名関数
+        console.log("mumei func")
+      })
+      hoge = function () {
+        //無名関数を変数に代入
+        console.log("hoge mumei func")
+      }
+      hoge() //代入された関数を実行
+      btn.addEventListener("click", hoge) //Listenerの関数にも指定できる。ただしhoge()だとバグる
+
+      btn.addEventListener("click", () => {
+        //アロー関数
+        console.log("arrow func")
+      })
+      hoge2 = () => console.log("hoge2 arrow func") //アロー関数。１文で完結する場合は波括弧も省略可能
+      hoge2()
+
+      user = {
+        name: "tio",
+        importants: {
+          address: "xxx",
+          phoneNum: "yyy",
+        },
+        userFunc: function () {
+          //メソッドを設定する際は必ず無名関数かアロー関数で。
+          console.log("myfunc " + this.name) //thisは当該オブジェクトのことを指す
+          this.name = "suzuki"
+        },
+      }
+      console.log(user)
+      user.userFunc()
+      console.log(user)
+
+      //オブジェクトに名前をつけて生成する方法。コンストラクタ
+      //このコンストラクタによって生成されるオブジェクトはMouse型と呼ばれる
+      //プロトタイプベースのオブジェクト生成方法
+      function Mouse(name, maker) {
+        //ifでバリデーションかけれる
+        this.name = name
+        this.maker = maker
+        this.usability = "good"
+      }
+      //Mouse型のオブジェクトを生成している
+      mouse1 = new Mouse("hoge", "logi")
+      console.log(mouse1)
+
+      a = "tio"
+      //プリミティブラッパーオブジェクト tio15
+      b = new String("tio")
+      console.log(b)
+      console.log(b[1])
+      console.log(a[1])
+
+      //配列操作 tio16
+      a = [1, 2, 3]
+      a.forEach((element) => {
+        //アロー関数使ってる。もちろん無名関数でfunctionでも動く
+        console.log(element)
+      })
+      b = [100, 200, 300, 400, 500]
+      c = b.map((element) => {
+        //map関数はforeachに戻り値機能が追加されたイメージ。新しい配列を返せる。
+        return (element = element + 10)
+      })
+      console.log(c)
+      d = b.filter((element) => {
+        //filter関数は条件から外れた値を除外して新たに配列を返せる。
+        if (element < 250) {
+          return true //trueで配列にセット
         }
-        console.log("owari")
-
-        array = [1,2,3,4,5]
-        for (let i = 0; i < array.length; i++) {
-            const element = array[i];
-            console.log(array[i])            
-        }
-
-        function addMemo(event){
-            inputText = document.getElementById("id-input-memo")
-            currentMemoList = memoList.innerHTML
-            //memo_list.innerText = "・" + input_text.value + "<br>"//innerTextで入れたらタグが発動しない            
-            memoList.innerHTML = currentMemoList + "・" + inputText.value + "<br>"//innerHTMLで入れたらタグが発動する。ただ実際にはinnerHTMLの使用は非推奨
-        }
-
-        function deleteMemo(event){
-            memoList.innerHTML = ""
-        }
-        
-        btn = document.getElementById("id-calc-price")
-        // btn.addEventListener("click", calcTotalPrice)
-        // function calcTotalPrice(){
-        //     prices = document.getElementsByClassName("class-price")
-        //     totalPrice = 0
-        //     for (let index = 0; index < prices.length; index++) {
-        //         totalPrice = totalPrice + Number(prices[index].innerText) //数値にキャストはNumber()
-        //     }
-        //     pTotal = document.getElementById("id-total-price")
-        //     pTotal.innerText = totalPrice
-        // }
-        btn.addEventListener("click",function(){//無名関数
-            console.log("mumei func")
+        return false //falseで配列から除外
+      })
+      //d = [100,200]
+      console.log(d)
+      //大体合計値を計算するときに使用。戻り値は単一の値。配列ではない。
+      //動きがちょいややこしい。１ループ目は(要素１つ目、要素２つ目)、２ループ目は（前回の計算結果、要素３つ目）～
+      e = b.reduce((prev, current) => {
+        return prev + current
+      })
+      console.log(e)
+      a = [100, 200, 300]
+      b = a
+        .map((element) => {
+          return (element = element - 10)
         })
-        hoge = function(){//無名関数を変数に代入
-            console.log("hoge mumei func")
-        }
-        hoge()//代入された関数を実行
-        btn.addEventListener("click",hoge)//Listenerの関数にも指定できる。ただしhoge()だとバグる
-
-        btn.addEventListener("click",()=>{//アロー関数
-            console.log("arrow func")
+        .filter((element) => {
+          if (element > 100) {
+            return true
+          }
+          return false
         })
-        hoge2 = () => console.log("hoge2 arrow func")//アロー関数。１文で完結する場合は波括弧も省略可能
-        hoge2()
-
-        user ={
-            name:"tio",
-            importants:{
-                address:"xxx",
-                phoneNum:"yyy"                
-            },
-            userFunc: function(){//メソッドを設定する際は必ず無名関数かアロー関数で。
-                console.log("myfunc " + this.name)//thisは当該オブジェクトのことを指す
-                this.name = "suzuki"
-            }
-
-        }
-        console.log(user)
-        user.userFunc()
-        console.log(user)
-
-        //オブジェクトに名前をつけて生成する方法。コンストラクタ
-        //このコンストラクタによって生成されるオブジェクトはMouse型と呼ばれる
-        //プロトタイプベースのオブジェクト生成方法
-        function Mouse(name, maker){
-            //ifでバリデーションかけれる
-            this.name = name
-            this.maker = maker
-            this.usability = "good"
-        }
-        //Mouse型のオブジェクトを生成している
-        mouse1 = new Mouse("hoge", "logi")
-        console.log(mouse1)
-
-        a = "tio"
-        //プリミティブラッパーオブジェクト tio15
-        b = new String("tio")
-        console.log(b)
-        console.log(b[1])
-        console.log(a[1])
-
-        //配列操作 tio16
-        a = [1,2,3]
-        a.forEach(element => {//アロー関数使ってる。もちろん無名関数でfunctionでも動く
-            console.log(element)
-        });
-        b = [100,200,300,400,500]
-        c= b.map(element =>{//map関数はforeachに戻り値機能が追加されたイメージ。新しい配列を返せる。
-            return element = element + 10
-        })        
-        console.log(c)
-        d = b.filter(element =>{//filter関数は条件から外れた値を除外して新たに配列を返せる。
-            if(element<250){
-                return true //trueで配列にセット
-            }
-            return false //falseで配列から除外
-        })
-        //d = [100,200]
-        console.log(d)
-        //大体合計値を計算するときに使用。戻り値は単一の値。配列ではない。
-        //動きがちょいややこしい。１ループ目は(要素１つ目、要素２つ目)、２ループ目は（前回の計算結果、要素３つ目）～
-        e = b.reduce((prev,current)=>{            
-            return prev + current
-        })
-        console.log(e)
-        a = [100,200,300]
-        b = a.map(element=>{
-            return element = element -10
-        }).filter(element=>{
-            if(element>100){
-                return true
-            }
-            return false
-        })
-        console.log(b)
-
-
-
-        
-
-
-
+      console.log(b)
     </script>
-</body>
+  </body>
 </html>
