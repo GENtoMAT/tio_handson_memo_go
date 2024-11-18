@@ -6,17 +6,18 @@
     <title>memo app not go</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
   </head>
-  <body>
+  <body style="padding: 32px; background-color: rgb(248, 249, 250)">
     <h1>memo app not go</h1>
     <h3>メモれ</h3>
-    <div>タイトル<input type="text" id="id-title" /></div>
-    <div>内容<textarea id="id-body"></textarea></div>
-    <button id="id-add-button">メモを登録</button>
-
+    <div style="padding-bottom: 16px">
+      <button id="id-add-button" class="btn btn-primary">メモを登録</button>
+    </div>
+    <div style="padding-bottom: 32px">
+      <button id="id-dlt-button" class="btn btn-secondary">メモを削除</button>
+    </div>
     <div>
       <h3>メモの一覧</h3>
-      <button id="id-dlt-button">メモを削除</button>
-      <table class="table">
+      <table class="table table-hover">
         <thead>
           <tr>
             <th scope="col"><input type="checkbox" id="id-dlt-all-memos" /></th>
@@ -32,12 +33,12 @@
       </table>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Modal 編集ボタン用-->
+    <div class="modal fade" id="id-edit-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">メモの全てを書き換えよ</h1>
+            <h1 class="modal-title fs-5" id="edit-modal-label">メモの全てを書き換えよ</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -95,74 +96,120 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
     <script>
+      //console.log(dayjs().format("YYYY-MM-DD HH:mm:ss"))
+
       const titleElement = document.getElementById("id-title")
       const bodyElement = document.getElementById("id-body")
-      const myModal = new bootstrap.Modal(document.getElementById("exampleModal")) //モーダルのインスタンスはグローバル変数として生成。最初に１つ作ってそれを適宜操作する
+      const myModal = new bootstrap.Modal(document.getElementById("id-edit-modal")) //モーダルのインスタンスはグローバル変数として生成。最初に１つ作ってそれを適宜操作する
       const addModal = new bootstrap.Modal(document.getElementById("id-add-modal")) //登録用のモーダル
       const addButton = document.getElementById("id-add-button")
+      const titleInAddModal = document.getElementById("id-add-modal-title")
+      const bodyInAddModal = document.getElementById("id-add-modal-body")
+      const titleInEditModal = document.getElementById("id-modal-title")
+      const bodyInEditModal = document.getElementById("id-modal-body")
+      const validInAddModal = document.getElementById("id-validation-error-in-add-modal")
+      const validInEditModal = document.getElementById("id-validation-error-in-edit-modal")
+      const memoList = document.getElementById("id-memo-list")
+      const checkboxes = document.getElementById(getCheckboxClass())
+      const TITLE_MIN = 1
+      const TITLE_MAX = 30
+      const BODY_MIN = 1
+      const BODY_MAX = 100
+
+      function createTitleInMemoListId(memoId) {
+        return "id-title-in-list-" + memoId
+      }
+      function getEleByIdTitleInMemoList(memoId) {
+        return document.getElementById(createTitleInMemoListId(memoId))
+      }
+      function createBodyInMemoListId(memoId) {
+        return "id-body-in-list-" + memoId
+      }
+      function getEleByIdBodyInMemoList(memoId) {
+        return document.getElementById(createBodyInMemoListId(memoId))
+      }
+      function createUpdatedAtInMemoListId(memoId) {
+        return "id-updated-at-in-list-" + memoId
+      }
+      function getEleByIdUpdatedAtInMemoList(memoId) {
+        return document.getElementById(createUpdatedAtInMemoListId(memoId))
+      }
+      function getEleByIdMemoInModal() {
+        return document.getElementById("id-memo-id-in-modal")
+      }
+      function getCheckboxClass() {
+        return "class-checkbox"
+      }
+
+      function isValidateMemoPassed(title, body, errorHTMLElement, memoId) {
+        if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
+          errorHTMLElement.style.display = "" //ココにもdisplayを指定する必要あり。タイトルのみNGだったときにバリデを表示させるため
+          errorHTMLElement.innerText = "タイトルは１文字以上、３０文字以内にしてください\n"
+        }
+        if (body.length < BODY_MIN || body.length > BODY_MAX) {
+          errorHTMLElement.style.display = "" //innerTextの入れ子の前にdisplayを指定する必要あり。
+          errorHTMLElement.innerText = errorHTMLElement.innerText + "本文は１文字以上、１００文字以内にしてください\n"
+        }
+        //バリデ：タイトル被り
+        if (memoList.children.length > 0) {
+          Array.from(memoList.children).forEach((tr) => {
+            const t = getEleByIdTitleInMemoList(tr.id).innerText
+            if (tr.id == memoId) {
+              //同じIDのメモはスルーさせる
+            } else if (title == t) {
+              errorHTMLElement.style.display = "" //ココにもdisplayを指定する必要あり。タイトル被りのみNGだったときにバリデを表示させるため
+              errorHTMLElement.innerText = errorHTMLElement.innerText + "すでに登録済みのタイトルです\n"
+            }
+          })
+        }
+        if (errorHTMLElement.innerText.length > 0) {
+          errorHTMLElement.innerText = errorHTMLElement.innerText.slice(0, -1)
+          return false
+        }
+        return true
+      }
 
       //////ボタン「メモを登録」押下時の処理
       addButton.addEventListener("click", (event) => {
         //登録モーダルの初期化
-        document.getElementById("id-add-modal-title").value = ""
-        document.getElementById("id-add-modal-body").value = ""
-        document.getElementById("id-validation-error-in-add-modal").style.display = "none"
+        titleInAddModal.value = ""
+        bodyInAddModal.value = ""
+        validInAddModal.style.display = "none"
+        validInAddModal.innerText = ""
         addModal.show()
       })
 
       //ボタン「登録モーダル内の登録ボタン」押下時の処理
-      const addButtonInModal = document.getElementById("id-add-btn-in-add-modal")
-      addButtonInModal.addEventListener("click", (event) => {
+      const addButtonInAddModal = document.getElementById("id-add-btn-in-add-modal")
+      addButtonInAddModal.addEventListener("click", (event) => {
         //入力された２つのデータをモーダルから取得
-        const title = document.getElementById("id-add-modal-title").value
-        const body = document.getElementById("id-add-modal-body").value
+        const title = titleInAddModal.value
+        const body = bodyInAddModal.value
         //入力文字数のチェック
-        const errorMessage = document.getElementById("id-validation-error-in-add-modal")
-        const TITLE_MIN = 1
-        const TITLE_MAX = 30
-        const BODY_MIN = 1
-        const BODY_MAX = 100
-        let hasError = false
-        errorMessage.innerText = ""
-        errorMessage.style.display = "" //innerTextの入れ子行の前にdisplayを指定しないと何故か改行が発動しない。
+        validInAddModal.innerText = ""
+        //errorMessage.style.display = "" //ココにdisplayを指定するのNG。バリデを一発クリアしたときにバリデ枠がチラ見えする
 
-        if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
-          errorMessage.innerText = "タイトルは１文字以上、３０文字以内にしてください\n"
-          hasError = true
-        }
-        if (body.length < BODY_MIN || body.length > BODY_MAX) {
-          errorMessage.innerText = errorMessage.innerText + "本文は１文字以上、１００文字以内にしてください\n"
-          hasError = true
-        }
-        //タイトル被りのバリデーション
-        const tmp = document.getElementById("id-memo-list")
-        if (tmp.children.length > 0) {
-          Array.from(tmp.children).forEach((tr) => {
-            const t = document.getElementById("id-title-in-list-" + tr.id).innerText
-            if (title == t) {
-              errorMessage.innerText = errorMessage.innerText + "すでに登録済みのタイトルです\n"
-              hasError = true
-            }
-          })
-        }
-        if (errorMessage.innerText.length > 0) {
-          errorMessage.innerText = errorMessage.innerText.slice(0, -1)
+        if (isValidateMemoPassed(title, body, validInAddModal, "") == false) {
           return
         }
 
         //メモリストに追加するデータの整形
-        const now = new Date()
-        const createdAt = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate()
+        const now = new dayjs()
+        const createdAt = now.format("YYYY-MM-DD HH:mm:ss")
         const updatedAt = "なし"
-        const memoId = now.getTime() //1970 年 1 月 1 日 00:00:00 UTC から現在までの経過時間のミリ秒。ユニーク値。ミリ秒で人が使うメモ帳だから成立してる。
+        const memoId = now.valueOf() //1970 年 1 月 1 日 00:00:00 UTC から現在までの経過時間のミリ秒。ユニーク値。ミリ秒で人が使うメモ帳だから成立してる。
         const editBtnId = "id-edit-btn-" + memoId
-        const titleInListId = "id-title-in-list-" + memoId
-        const updatedAtId = "id-updated-at-in-list-" + memoId
+        const titleInListId = createTitleInMemoListId(memoId)
+        const updatedAtId = createUpdatedAtInMemoListId(memoId)
         const tr = document.createElement("tr")
         tr.setAttribute("id", memoId)
         tr.innerHTML =
-          '<td><input class="class-checkbox" data-memomemo-id="' +
+          '<td><input class="' +
+          getCheckboxClass() +
+          '" data-memomemo-id="' +
           memoId +
           '"type="checkbox" /></td><td id="' +
           titleInListId +
@@ -179,11 +226,10 @@
           '" id="' +
           editBtnId +
           '" class="btn btn-primary">編集</button></td>'
-        const memoList = document.getElementById("id-memo-list")
         memoList.appendChild(tr)
-        //メモの中味をhiddenのinput.valueに格納してtrのオシリにくっつける
+        //メモの中味をhiddenのinput.valueに格納してtrの末尾に追加
         const inputForBody = document.createElement("input")
-        inputForBody.setAttribute("id", "id-body-in-list-" + memoId)
+        inputForBody.setAttribute("id", createBodyInMemoListId(memoId))
         inputForBody.setAttribute("type", "hidden")
         inputForBody.value = body
         tr.appendChild(inputForBody)
@@ -191,19 +237,19 @@
         //編集ボタンを押した時のモーダル呼び出し設定を張っていく
         const editBtn = document.getElementById(editBtnId)
         editBtn.addEventListener("click", (event) => {
+          //編集モーダルの初期化
+          validInEditModal.style.display = "none"
+          validInEditModal.innerText = ""
           //タイトル、中味をHTMLから取ってくる
           const memoId = event.currentTarget.dataset.memomemoId
-          document.getElementById("id-memo-id-in-modal").value = memoId //モーダルにmemoIdを埋め込んでおく
-          const titleId = "id-title-in-list-" + memoId
-          const bodyId = "id-body-in-list-" + memoId
-          const selectedMemoTitle = document.getElementById(titleId).innerText
-          const selectedMemoBody = document.getElementById(bodyId).value //中味はinputだからvalueでOK
+          getEleByIdMemoInModal().value = memoId //モーダルにmemoIdを埋め込んでおく
+          const selectedMemoTitle = getEleByIdTitleInMemoList(memoId).innerText
+          const selectedMemoBody = getEleByIdBodyInMemoList(memoId).value //中味はinputだからvalueでOK
           //２つのデータをモーダルに渡す
-          const titleModalElement = document.getElementById("id-modal-title")
-          const bodyModalElement = document.getElementById("id-modal-body")
+          const titleModalElement = titleInEditModal
+          const bodyModalElement = bodyInEditModal
           titleModalElement.value = selectedMemoTitle
           bodyModalElement.value = selectedMemoBody
-          document.getElementById("exampleModalLabel").innerText = "メモの全てを書き換えよ"
           myModal.show()
         })
         addModal.hide()
@@ -212,8 +258,7 @@
       //////メモを削除
       const dltBtn = document.getElementById("id-dlt-button")
       dltBtn.addEventListener("click", () => {
-        const checkboxes = document.getElementsByClassName("class-checkbox")
-        //const memoList = document.getElementById("id-memo-list")
+        //checkboxes は冒頭で定義
         //const checkboxes = memoList.getElementsByTagName("input") //memoListのinputをサーチする方法でもOK
         Array.from(checkboxes).forEach((checkbox) => {
           if (checkbox.checked == false) {
@@ -228,7 +273,7 @@
       const dltAllMemos = document.getElementById("id-dlt-all-memos")
       dltAllMemos.addEventListener("change", () => {
         //clickよりもchangeの方が適切
-        const checkboxes = document.getElementsByClassName("class-checkbox")
+        //checkboxes は冒頭で定義
         console.log(checkboxes.length)
         //登録メモが０件の場合
         if (checkboxes.length == 0) {
@@ -243,159 +288,32 @@
         })
       })
 
-      //////モーダル上、メモを更新
+      /////ボタン「編集モーダル上の更新ボタン」を押した時の処理
       const updateMemoBtn = document.getElementById("id-update-btn")
       updateMemoBtn.addEventListener("click", (event) => {
-        console.log("upd")
-        const memoId = document.getElementById("id-memo-id-in-modal").value
+        const memoId = getEleByIdMemoInModal().value
+        //編集後の２つのデータをモーダルから取得
+        const title_edited = titleInEditModal.value
+        const body_edited = bodyInEditModal.value
+        //バリデ：入力文字数のチェック
+        validInEditModal.innerText = ""
+
+        if (isValidateMemoPassed(title_edited, body_edited, validInEditModal, memoId) == false) {
+          return
+        }
+
         //メモリスト上の元のメモデータを指定
-        const titleId = "id-title-in-list-" + memoId
-        const bodyId = "id-body-in-list-" + memoId
-        const selectedMemoTitle = document.getElementById(titleId)
-        const selectedMemoBody = document.getElementById(bodyId) //中味はinputだからvalueでOK
-        //２つのデータをモーダルからメモリストに渡す
-        const titleModalElement = document.getElementById("id-modal-title").value
-        const bodyModalElement = document.getElementById("id-modal-body").value
-        //selectedMemoTitle = titleModalElement //selectedの最初の定義で.innerTextつけて、そのままtitleModalElementを代入するとエラーになる（Assignment to constant variable
-        selectedMemoTitle.innerText = titleModalElement //ココでプロパティ追加指定すると通る
-        selectedMemoBody.value = bodyModalElement
+        const selectedMemoTitle = getEleByIdTitleInMemoList(memoId)
+        const selectedMemoBody = getEleByIdBodyInMemoList(memoId)
+        //selectedMemoTitle = title_edited //selectedの最初の定義で.innerTextつけて、そのままtitleModalElementを代入するとエラーになる（Assignment to constant variable
+        selectedMemoTitle.innerText = title_edited //ココでプロパティ追加指定すると通る
+        selectedMemoBody.value = body_edited //中味はinputだからvalueでOK
         //更新日を処理する
-        const now = new Date()
-        const updatedAt = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate()
-        document.getElementById("id-updated-at-in-list-" + memoId).innerText = updatedAt
+        const now = new dayjs()
+        const updatedAt = now.format("YYYY-MM-DD HH:mm:ss")
+        getEleByIdUpdatedAtInMemoList(memoId).innerText = updatedAt
         myModal.hide()
       })
     </script>
   </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <h1>memo app not go</h1>
-    <h3>メモれ</h3>
-    <div>タイトル<input type="text" id="id-title" /></div>
-    <div>内容<textarea id="id-body"></textarea></div>
-    <button id="id-add-button">メモを登録</button>
-
-    <div>
-      <h3>メモの一覧</h3>
-      <button id="id-dlt-button">メモを削除</button>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">
-              <input type="checkbox" id="id-dlt-all-memos" />
-            </th>
-            <th scope="col">タイトル</th>
-            <th scope="col">作成日</th>
-            <th scope="col">更新日</th>
-            <th scope="col">編集</th>
-          </tr>
-        </thead>
-        <tbody id="id-memo-list">
-          <tr></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <script>
-      const titleElement = document.getElementById("id-title")
-      const bodyElement = document.getElementById("id-body")
-      const addButton = document.getElementById("id-add-button")
-
-      addButton.addEventListener("click", (event) => {
-        const title = titleElement.value //この関数内の変数は後から変更することが無いのでconstが正解
-        const body = bodyElement.value
-        const now = new Date()
-        const createdAt =
-          now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate()
-        const updatedAt = "なし"
-        const memoId = now.getTime() //1970 年 1 月 1 日 00:00:00 UTC から現在までの経過時間のミリ秒。ユニーク値。ミリ秒で人が使うメモ帳だから成立してる。
-        //console.log(title + body + createdAt)
-        const tr = document.createElement("tr")
-        tr.setAttribute("id", memoId)
-        tr.innerHTML =
-          '<td><input class="class-checkbox" data-memomemo-id="' +
-          memoId +
-          '"type="checkbox" /></td><td>' +
-          title +
-          "</td><td>" +
-          createdAt +
-          "</td><td>" +
-          updatedAt +
-          "</td><td><button>編集</button></td>"
-        const memoList = document.getElementById("id-memo-list")
-        memoList.appendChild(tr)
-      })
-
-      dltBtn = document.getElementById("id-dlt-button")
-      dltBtn.addEventListener("click", () => {
-        const checkboxes = document.getElementsByClassName("class-checkbox")
-        //const memoList = document.getElementById("id-memo-list")
-        //const checkboxes = memoList.getElementsByTagName("input") //memoListのinputをサーチする方法でもOK
-        Array.from(checkboxes).forEach((checkbox) => {
-          if (checkbox.checked == false) {
-            return false
-          }
-          const memoId = checkbox.dataset.memomemoId //データ属性特有の記法。dataset.で結んでidの頭data-を取ってハイフン消して頭文字大文字キャメルで連結させる。
-          document.getElementById(memoId).remove() //原則memoIdとmemomemoIdは同じ値。IdでmemoIdを指定するとtrを引っ掛けれる。trをリムーブしてるので行ごと消せる。
-        })
-
-        // //これで取れるのがオブジェクトツリーっぽい形。実際のHTMLそのまま。
-        // console.log(memoList)
-        // const trs = memoList.getElementsByTagName("tr")
-        // console.log("trs_array")
-        // //ツリー型が扱いづらいのでこの処理で配列化している。
-        // console.log(Array.from(trs))
-        // //childNodesに行のHTMLがそのまま入ってる。改行、td、改行、td、改行、td、改行、td、改行、td、改行。
-        // Array.from(trs).filter((tr) => {
-        //   const tds = tr.getElementsByTagName("td") //上記のchildNodesのtdを引っ掛けて後段で配列化。
-        //   console.log("tds_array")
-        //   console.log(Array.from(tds))
-        //   const checkedTds = Array.from(tds).filter((td) => {
-        //     const input = td.getElementsByTagName("input") //childNodesの中の"input"を引っ掛けてる
-        //     console.log("searched input")
-        //     console.log(input)
-        //     //checkboxのセル以外は無視
-        //     if (input.length == 0) {
-        //       return false
-        //     }
-        //     const chbx = input[0]
-        //     //checkboxがチェックされてるか確認
-        //     if (chbx.checked == true) {
-        //       return true
-        //     }
-        //     return false
-        //   })
-        //   checkedTds.forEach((checkedTd) => {
-        //     checkedTd.parentElement.remove()
-        //     console.log("removed")
-        //   })
-        // })
-      })
-
-      dltAllMemos = document.getElementById("id-dlt-all-memos")
-      dltAllMemos.addEventListener("change", () => {
-        //clickよりもchangeの方が適切
-        const checkboxes = document.getElementsByClassName("class-checkbox")
-        console.log(checkboxes.length)
-        if (checkboxes.length == 0) {
-          return
-        }
-        Array.from(checkboxes).forEach((checkbox) => {
-          if (dltAllMemos.checked == false) {
-            checkbox.checked = false
-          } else {
-            checkbox.checked = true
-          }
-        })
-      })
-    </script>
-  </body>
-</html> -->
