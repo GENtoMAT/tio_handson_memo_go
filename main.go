@@ -11,7 +11,7 @@ func main() {
 	fmt.Println("serving start")
 	count = 0
 	num_access = 0
-	data, err := os.ReadFile("memo_go.html") //ReadFile()　でファイル読み込み。読み込み成功したらdataに渡る＆err=nilに。失敗したらerr=エラーデータ。
+	data, err := os.ReadFile("test_go.html") //ReadFile()　でファイル読み込み。読み込み成功したらdataに渡る＆err=nilに。失敗したらerr=エラーデータ。
 	//gethtmlメソッドの中からココに移植。あそこだと関数呼ばれるたびにReadfileしてしまってる。一回読めばOK。
 	//javascriptは返り値を１つしか渡せないが、Goは複数個可能。
 	if err != nil {
